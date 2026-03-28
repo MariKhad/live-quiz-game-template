@@ -26,7 +26,7 @@ type Screen =
   | 'question-result'
   | 'final-results';
 
-const WS_URL = 'ws://localhost:3000';
+const WS_URL = (import.meta as any).env.VITE_WS_URL  || `ws://192.168.1.103:3000`;
 
 function App() {
   const { isConnected, lastMessage, sendMessage } = useWebSocket(WS_URL);

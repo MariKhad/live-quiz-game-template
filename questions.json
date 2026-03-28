@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "text": "Which element has the chemical symbol 'Au'?",
+      "options": ["Silver", "Iron", "Gold", "Aluminum"],
+      "correctIndex": 2,
+      "timeLimitSec": 15
+    },
+    {
+      "text": "Who painted the Mona Lisa?",
+      "options": ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
+      "correctIndex": 2,
+      "timeLimitSec": 15
+    },
+    {
+      "text": "What is the longest river in the world?",
+      "options": ["Amazon River", "Yangtze River", "Mississippi River", "Nile River"],
+      "correctIndex": 3,
+      "timeLimitSec": 15
+    },
+    {
+      "text": "In which year did World War II end?",
+      "options": ["1943", "1944", "1945", "1946"],
+      "correctIndex": 2,
+      "timeLimitSec": 15
+    },
+    {
+      "text": "Which country is known as the Land of the Rising Sun?",
+      "options": ["China", "Thailand", "South Korea", "Japan"],
+      "correctIndex": 3,
+      "timeLimitSec": 15
+    }
+  ]
+}

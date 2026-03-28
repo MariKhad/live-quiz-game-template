@@ -1,4 +1,5 @@
 import type { WebSocket } from 'ws';
+import { GAME_STATUSES, INCOMING_MESSAGES, OUTGOING_MESSAGES } from './utils/consts';
 
 export interface Player {
   name: string;
@@ -24,7 +25,7 @@ export interface Game {
   questions: Question[];
   players: Player[];
   currentQuestion: number;
-  status: 'waiting' | 'in_progress' | 'finished';
+  status: GameStatus;
   questionStartTime?: number;
   questionTimer?: NodeJS.Timeout;
   playerAnswers: Map<string, { answerIndex: number; timestamp: number }>;
@@ -38,9 +39,9 @@ export interface User {
 }
 
 export interface WSMessage {
-  type: string;
-  data: any;
-  id: number;
+  type: OutgoingMessageType | IncomingMessageType;
+  data: RegData | CreateGameData | JoinGameData | StartGameData | AnswerData | any;
+  id: 0;
 }
 
 export interface RegData {
@@ -65,3 +66,7 @@ export interface AnswerData {
   questionIndex: number;
   answerIndex: number;
 }
+
+export type IncomingMessageType = typeof INCOMING_MESSAGES[keyof typeof INCOMING_MESSAGES];
+export type OutgoingMessageType = typeof OUTGOING_MESSAGES[keyof typeof OUTGOING_MESSAGES];
+export type GameStatus = typeof GAME_STATUSES[keyof typeof GAME_STATUSES];

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "questions": [
+    {
+      "text": "Which element has the chemical symbol 'Au'?",
+      "options": [
+        "Silver",
+        "Iron",
+        "Gold",
+        "Aluminum"
+      ],
+      "correctIndex": 2,
+      "timeLimitSec": 30
+    },
+    {
+      "text": "Who painted the Mona Lisa?",
+      "options": [
+        "Vincent van Gogh",
+        "Pablo Picasso",
+        "Leonardo da Vinci",
+        "Michelangelo"
+      ],
+      "correctIndex": 2,
+      "timeLimitSec": 30
+    }
+  ]
+}
