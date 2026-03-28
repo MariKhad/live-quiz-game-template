@@ -2,7 +2,7 @@ import { WebSocket } from 'ws';
 import { Player } from '../types.js';
 
 export const players = new Map<string, Player>();
-const gamePlayers = new Map<string, Set<string>>(); // gameId -> Set of playerIds
+const gamePlayers = new Map<string, Set<string>>();
 
 export function getPlayer(playerId: string): Player | undefined {
   return players.get(playerId);
