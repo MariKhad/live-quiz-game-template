@@ -64,12 +64,7 @@ export function finalizeQuestion(game: Game): void {
             pointsEarned: pointsEarned,
             totalScore: player.score
         });
-
-        console.log(`[Score] ${player.name}: ${isCorrect ? '✓' : '✗'} +${pointsEarned} pts, total: ${player.score}`);
     }
-
-    console.log(`[Finalize] playerResults length: ${playerResults.length}`);
-    console.log(`[Finalize] playerResults:`, JSON.stringify(playerResults, null, 2));
 
 
     broadcastToGame(game.id, {
@@ -98,10 +93,7 @@ export function finalizeQuestion(game: Game): void {
 }
 
 export function sendNextQuestion(game: Game): void {
-    console.log(`[SendNextQuestion] ========== START ==========`);
-    console.log(`[SendNextQuestion] Game ${game.id}, currentQuestion=${game.currentQuestion}`);
-    
-    console.log(`[SendNextQuestion] Players BEFORE reset:`);
+
     for (const p of game.players) {
         console.log(`  - ${p.name}: hasAnswered=${p.hasAnswered}, score=${p.score}, ws=${!!p.ws}`);
     }
@@ -121,12 +113,10 @@ export function sendNextQuestion(game: Game): void {
         player.answeredCorrectly = false;
     }
     
-    console.log(`[SendNextQuestion] Players AFTER reset:`);
     for (const p of game.players) {
         console.log(`  - ${p.name}: hasAnswered=${p.hasAnswered}, score=${p.score}, ws=${!!p.ws}`);
     }
     
-    console.log(`[SendNextQuestion] Global players Map state:`);
     for (const [index, p] of players.entries()) {
         const inGame = game.players.some(gp => gp.index === index);
         if (inGame) {
@@ -148,12 +138,10 @@ export function sendNextQuestion(game: Game): void {
         id: 0
     });
     
-    console.log(`[Game] Sent question ${game.currentQuestion + 1}/${game.questions.length} to game ${game.id}`);
     
     startTimer(game, (game) => {
         console.log(`[Timer] Time's up for game ${game.id}, question ${game.currentQuestion}`);
         finalizeQuestion(game);
     });
     
-    console.log(`[SendNextQuestion] ========== END ==========`);
 }

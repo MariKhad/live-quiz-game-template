@@ -6,15 +6,12 @@ export function startTimer(game: Game, callback: (game: Game) => void): void {
     
     const timeLimitMs = currentQuestion.timeLimitSec * 1000;
     
-    // Сохраняем время начала вопроса
     game.questionStartTime = Date.now();
     
-    // Очищаем старый таймер, если есть
     if (game.questionTimer) {
         clearTimeout(game.questionTimer);
     }
-    
-    // Устанавливаем новый таймер
+
     game.questionTimer = setTimeout(() => {
         callback(game);
     }, timeLimitMs);

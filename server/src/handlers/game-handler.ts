@@ -51,9 +51,6 @@ export function handleJoinGame(ws: WebSocket, message: WSMessage): void {
     const data = message.data as { code: string };
     const { code } = data;
     
-    console.log(`[JoinGame] ========== START ==========`);
-    console.log(`[JoinGame] Code: ${code}`);
-    
     let player: Player | undefined;
     for (const p of players.values()) {
         if (p.ws === ws) {
@@ -81,18 +78,13 @@ export function handleJoinGame(ws: WebSocket, message: WSMessage): void {
         sendErrorResponse(ws, 'Game not found')
         return;
     }
-    
-    console.log(`[JoinGame] Game found: ${targetGame.id}`);
-    console.log(`[JoinGame] Current players in game:`, targetGame.players.map(p => ({ name: p.name, index: p.index })));
-    
-    // 👇 СНАЧАЛА УДАЛЯЕМ, ЕСЛИ ЕСТЬ (даже если alreadyInGame)
+
     const existingIndex = targetGame.players.findIndex(p => p.index === player!.index);
     if (existingIndex !== -1) {
         console.log(`[JoinGame] Player already in game.players, removing old copy`);
         targetGame.players.splice(existingIndex, 1);
     }
     
-    // 👇 ПОТОМ ДОБАВЛЯЕМ ССЫЛКУ
     targetGame.players.push(player);
     console.log(`[JoinGame] Added player, new total: ${targetGame.players.length}`);
     console.log(`[JoinGame] Players now:`, targetGame.players.map(p => ({ 
@@ -126,7 +118,6 @@ export function handleJoinGame(ws: WebSocket, message: WSMessage): void {
         id: 0
     });
     
-    console.log(`[JoinGame] ========== END ==========`);
 }
 
 export function handleStartGame(ws: WebSocket, message: WSMessage): void {
@@ -164,15 +155,11 @@ export function handleStartGame(ws: WebSocket, message: WSMessage): void {
 }
 
 export function handleAnswer(ws: WebSocket, message: WSMessage): void {
-    console.log(`[Answer] ========== HANDLE ANSWER START ==========`);
     console.log(`[Answer] Received message:`, JSON.stringify(message, null, 2));
 
     const data = message.data as { gameId?: string; questionIndex: number; answerIndex: number };
     const { questionIndex, answerIndex } = data;
     
-    console.log(`[Answer] Parsed data: questionIndex=${questionIndex}, answerIndex=${answerIndex}`);
-    
-    // 1. Находим игрока по WebSocket
     let player: Player | undefined;
     for (const p of players.values()) {
         if (p.ws === ws) {
@@ -182,13 +169,11 @@ export function handleAnswer(ws: WebSocket, message: WSMessage): void {
     }
     
     if (!player) {
-        console.log(`[Answer] ❌ Player not found`);
+        console.log(`[Answer] Player not found`);
         return;
     }
     
-    console.log(`[Answer] ✅ Player found: ${player.name} (${player.index})`);
-    
-    // 2. Находим игру, в которой участвует игрок
+
     let game: Game | undefined;
     for (const g of games.values()) {
         if (g.status === GAME_STATUSES.IN_PROGRESS && g.players.some(p => p.index === player.index)) {
@@ -198,39 +183,31 @@ export function handleAnswer(ws: WebSocket, message: WSMessage): void {
     }
     
     if (!game) {
-        console.log(`[Answer] ❌ Game not found for player ${player.name}`);
+        console.log(`[Answer] Game not found for player ${player.name}`);
         return;
     }
     
-    console.log(`[Answer] ✅ Game found: ${game.id}, currentQuestion=${game.currentQuestion}`);
-    
-    // 3. Проверяем, что вопрос актуальный
+
     if (questionIndex !== game.currentQuestion) {
-        console.log(`[Answer] ❌ Wrong question index: got ${questionIndex}, expected ${game.currentQuestion}`);
+        console.log(`[Answer] Wrong question index: got ${questionIndex}, expected ${game.currentQuestion}`);
         return;
     }
     
-    // 4. Проверяем, не отвечал ли уже
     if (player.hasAnswered) {
-        console.log(`[Answer] ❌ Player already answered this question`);
+        console.log(`[Answer] Player already answered this question`);
         return;
     }
-    
-    // 5. Получаем текущий вопрос
+
     const currentQuestion = game.questions[game.currentQuestion];
     if (!currentQuestion) {
-        console.log(`[Answer] ❌ Current question not found`);
+        console.log(`[Answer] Current question not found`);
         return;
     }
     
-    // 6. Проверяем ответ
     const isCorrect = answerIndex === currentQuestion.correctIndex;
     const answerTime = Date.now();
     const questionStartTime = game.questionStartTime || answerTime;
     const timeSpent = answerTime - questionStartTime;
-    
-    console.log(`[Answer] Answer is ${isCorrect ? '✓ CORRECT' : '✗ WRONG'}`);
-    console.log(`[Answer] Time spent: ${timeSpent}ms`);
     
     let pointsEarned = 0;
     
@@ -239,13 +216,11 @@ export function handleAnswer(ws: WebSocket, message: WSMessage): void {
         console.log(`[Answer] Points earned: ${pointsEarned}`);
     }
     
-    // 7. Обновляем игрока
     player.hasAnswered = true;
     player.answerTime = answerTime;
     player.answeredCorrectly = isCorrect;
     player.score += pointsEarned;
     
-    // 8. Обновляем в game.players
     const gamePlayer = game.players.find(p => p.index === player.index);
     if (gamePlayer) {
         gamePlayer.hasAnswered = true;
@@ -254,25 +229,20 @@ export function handleAnswer(ws: WebSocket, message: WSMessage): void {
         gamePlayer.score += pointsEarned;
     }
     
-    // 9. Сохраняем ответ
     game.playerAnswers.set(player.index, {
         answerIndex: answerIndex,
         timestamp: answerTime
     });
     
-    // 10. Отправляем подтверждение
     sendToPlayer(ws, {
         type: OUTGOING_MESSAGES.ANSWER_ACCEPTED,
         data: { questionIndex },
         id: 0
     });
     
-    // 11. Проверяем, все ли ответили
     const allAnswered = game.players.every(p => p.hasAnswered === true);
-    console.log(`[Answer] allAnswered = ${allAnswered}`);
     
     if (allAnswered) {
-        console.log(`[Answer] 🎯 ALL PLAYERS ANSWERED! Finalizing...`);
         
         if (game.questionTimer) {
             clearTimeout(game.questionTimer);
@@ -281,8 +251,6 @@ export function handleAnswer(ws: WebSocket, message: WSMessage): void {
         
         finalizeQuestion(game);
     }
-    
-    console.log(`[Answer] ========== HANDLE ANSWER END ==========`);
 }
 
 

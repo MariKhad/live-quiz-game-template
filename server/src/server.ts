@@ -8,6 +8,7 @@ import {
 import { broadcastToGame } from './utils/broadcast.js';
 import { handleMessage } from './handlers/message-handler.js';
 import { games } from './storage/games.js';
+import { GAME_STATUSES, OUTGOING_MESSAGES } from './utils/consts.js';
 
 
 export function setupWebSocketServer(wss: WebSocketServer): void {
@@ -62,7 +63,7 @@ function handleIncomingMessage(ws: WebSocket, data: Buffer): void {
         console.error('[Message Error]', error);
 
         ws.send(JSON.stringify({
-            type: 'error',
+            type: OUTGOING_MESSAGES.ERROR,
             data: {
                 error: true,
                 errorText: error instanceof Error ? error.message : 'Invalid message format'
@@ -96,7 +97,7 @@ function handleDisconnect(ws: WebSocket): void {
         const remainingPlayers = getPlayersInGame(gameId);
         
         broadcastToGame(gameId, {
-            type: 'update_players',
+            type: OUTGOING_MESSAGES.UPDATE_PLAYERS,
             data: remainingPlayers.map(p => ({
                 name: p.name,
                 index: p.index,
@@ -113,15 +114,15 @@ function handleDisconnect(ws: WebSocket): void {
     for (const game of games.values()) {
         if (game.hostId === disconnectedPlayer.index && game.status === 'in_progress') {
             console.log(`[Disconnect] Host disconnected during game ${game.id}, finishing game`);
-            game.status = 'finished';
+            game.status = GAME_STATUSES.FINISHED;
             
             broadcastToGame(game.id, {
-                type: 'game_finished',
+                type: OUTGOING_MESSAGES.GAME_FINISHED,
                 data: {
                     scoreboard: game.players.map(p => ({
                         name: p.name,
                         score: p.score,
-                        rank: 1 // временно, позже будет расчет
+                        rank: 1 
                     }))
                 },
                 id: 0
